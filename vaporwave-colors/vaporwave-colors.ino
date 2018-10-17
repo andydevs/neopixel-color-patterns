@@ -16,7 +16,7 @@
 const int WIPE_TIME = 20;
 
 // Time delay between each alternation in colorAlternate section
-const int ALT_TIME = 1000;
+const int STRIPE_TIME = 1000;
 
 // Time delay between fade states in colorFade
 const int FADE_TIME = 10;
@@ -39,9 +39,12 @@ uint8_t brightness = 255 ;
 uint16_t gradient_length = 255;
 
 // Color info
-Adafruit_ColorRGB violet   = Adafruit_ColorRGB(0.5, 0.0, 1.0);
-Adafruit_ColorRGB red      = Adafruit_ColorRGB(1.0, 0.0, 0.0);
-Adafruit_ColorRGB gradient = (red - violet) / gradient_length;
+Adafruit_ColorRGB violet = Adafruit_ColorRGB(0.5, 0.0, 1.0);
+Adafruit_ColorRGB red    = Adafruit_ColorRGB(1.0, 0.0, 0.0);
+
+// Gradient info
+Adafruit_ColorRGB gradient_violet2red = (red - violet) / gradient_length;
+Adafruit_ColorRGB gradient_red2violet = (violet - red) / gradient_length;
 
 /**
  * Runs at the beginning of code
@@ -74,9 +77,10 @@ void loop() {
   
   // Gradient fade 3 times
   for (int i = 0; i < 3; i++) {
-    gradientFade(violet, gradient, gradient_length, FADE_TIME);
+    gradientFade(violet, gradient_violet2red, gradient_length, FADE_TIME);
+    gradientFade(red, gradient_red2violet, gradient_length, FADE_TIME);
   }
-
+  
   // Cascade fade 5 times
   for (int i = 0; i < 5; i++) {
     gradientCascadeFade(violet, gradient, gradient_length, CASCADE_FADE_TIME);
@@ -146,17 +150,16 @@ void colorStripe(Adafruit_ColorRGB colorA, Adafruit_ColorRGB colorB, uint16_t wi
 }
 
 /**
- * Fades colors mapped by the given gradient
+ * Fades between colors mapped by gradient
  * 
  * @param gradient the gradient map
  * @param wait     the time between iterations
  */
 void gradientFade(Adafruit_ColorRGB start, Adafruit_ColorRGB gradient, uint16_t gradient_length, uint16_t wait) {
-  uint16_t x;
-  for (int i = 0; i < 2*gradient_length; i++) {
-    for (int j = 0; j < strip.numPixels(); j++) {
-      x = i > gradient_length ? 2*gradient_length - i : i;
-      strip.setPixelColor(j, start + gradient*x);
+  // For each time step
+  for (uint16_t t = 0; t < gradient_length; t++) {
+    for (uint16_t i = 0; i < strip.numPixels(); i++) {
+      strip.setPixelColor(i, start + gradient*t);
     }
     strip.show();
     delay(wait);

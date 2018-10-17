@@ -16,7 +16,7 @@
 const int WIPE_TIME = 20;
 
 // Time delay between each alternation in colorAlternate section
-const int ALT_TIME = 1000;
+const int STRIPE_TIME = 1000;
 
 // Time delay between fade states in colorFade
 const int FADE_TIME = 10;
@@ -41,7 +41,10 @@ uint16_t gradient_length = 255;
 // Color info
 Adafruit_ColorRGB green    = Adafruit_ColorRGB(0.0,  0.5,  0.05);
 Adafruit_ColorRGB silver   = Adafruit_ColorRGB(0.64, 0.67, 0.68);
-Adafruit_ColorRGB gradient = (silver - green) / gradient_length;
+
+// Gradient info
+Adafruit_ColorRGB gradient_green2silver = (silver - green) / gradient_length;
+Adafruit_ColorRGB gradient_silver2green = (green - silver) / gradient_length;
 
 /**
  * Runs at the beginning of code
@@ -74,7 +77,8 @@ void loop() {
   
   // Gradient fade 3 times
   for (int i = 0; i < 3; i++) {
-    gradientFade(green, gradient, gradient_length, FADE_TIME);
+    gradientFade(green, gradient_green2silver, gradient_length, FADE_TIME);
+    gradientFade(silver, gradient_silver2green, gradient_length, FADE_TIME);
   }
 
   // Cascade fade 5 times
@@ -146,17 +150,16 @@ void colorStripe(Adafruit_ColorRGB colorA, Adafruit_ColorRGB colorB, uint16_t wi
 }
 
 /**
- * Fades colors mapped by the given gradient
+ * Fades between colors mapped by gradient
  * 
  * @param gradient the gradient map
  * @param wait     the time between iterations
  */
 void gradientFade(Adafruit_ColorRGB start, Adafruit_ColorRGB gradient, uint16_t gradient_length, uint16_t wait) {
-  uint16_t x;
-  for (int i = 0; i < 2*gradient_length; i++) {
-    for (int j = 0; j < strip.numPixels(); j++) {
-      x = i > gradient_length ? 2*gradient_length - i : i;
-      strip.setPixelColor(j, start + gradient*x);
+  // For each time step
+  for (uint16_t t = 0; t < gradient_length; t++) {
+    for (uint16_t i = 0; i < strip.numPixels(); i++) {
+      strip.setPixelColor(i, start + gradient*t);
     }
     strip.show();
     delay(wait);

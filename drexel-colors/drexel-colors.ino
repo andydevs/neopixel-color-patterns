@@ -39,9 +39,12 @@ uint8_t brightness = 255;
 uint16_t gradient_length = 255;
 
 // Color info
-Adafruit_ColorRGB blue     = Adafruit_ColorRGB(0.0, 0.0, 1.0);
-Adafruit_ColorRGB yellow   = Adafruit_ColorRGB(1.0, 1.0, 0.0);
-Adafruit_ColorRGB gradient = (yellow - blue) / gradient_length;
+Adafruit_ColorRGB blue   = Adafruit_ColorRGB(0.0, 0.0, 1.0);
+Adafruit_ColorRGB yellow = Adafruit_ColorRGB(1.0, 1.0, 0.0);
+
+// Gradient info
+Adafruit_ColorRGB gradient_blue2yellow = (yellow - blue) / gradient_length;
+Adafruit_ColorRGB gradient_yellow2blue = (blue - yellow) / gradient_length;
 
 /**
  * Runs at the beginning of code
@@ -74,12 +77,13 @@ void loop() {
   
   // Gradient fade 3 times
   for (int i = 0; i < 3; i++) {
-    gradientFade(blue, gradient, gradient_length, FADE_TIME);
+    gradientFade(blue, gradient_blue2yellow, gradient_length, FADE_TIME);
+    gradientFade(yellow, gradient_yellow2blue, gradient_length, FADE_TIME);
   }
 
   // Cascade fade 5 times
   for (int i = 0; i < 5; i++) {
-    gradientCascadeFade(blue, gradient, gradient_length, CASCADE_FADE_TIME);
+    gradientCascadeFade(blue, gradient_blue2yellow, gradient_length, CASCADE_FADE_TIME);
   }
 }
 
@@ -146,17 +150,16 @@ void colorStripe(Adafruit_ColorRGB colorA, Adafruit_ColorRGB colorB, uint16_t wi
 }
 
 /**
- * Fades colors mapped by the given gradient
+ * Fades between colors mapped by gradient
  * 
  * @param gradient the gradient map
  * @param wait     the time between iterations
  */
 void gradientFade(Adafruit_ColorRGB start, Adafruit_ColorRGB gradient, uint16_t gradient_length, uint16_t wait) {
-  uint16_t x;
-  for (int i = 0; i < 2*gradient_length; i++) {
-    for (int j = 0; j < strip.numPixels(); j++) {
-      x = i > gradient_length ? 2*gradient_length - i : i;
-      strip.setPixelColor(j, start + gradient*x);
+  // For each time step
+  for (uint16_t t = 0; t < gradient_length; t++) {
+    for (uint16_t i = 0; i < strip.numPixels(); i++) {
+      strip.setPixelColor(i, start + gradient*t);
     }
     strip.show();
     delay(wait);
