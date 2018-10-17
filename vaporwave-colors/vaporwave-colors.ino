@@ -68,7 +68,8 @@ void loop() {
 
   // Alternate colors 5 times
   for (int i = 0; i < 5; i++) {
-    colorAlternate(violet, red, 4, ALT_TIME);
+    colorStripe(violet, red, 4, STRIPE_TIME);
+    colorStripe(red, violet, 4, STRIPE_TIME);
   }
   
   // Gradient fade 3 times
@@ -111,39 +112,35 @@ void colorWipe(Adafruit_ColorRGB color, uint16_t wait) {
 }
 
 /**
- * Sets each alternating LED to one of two colors
+ * Stripe color A and color B in alternating stripes of given width
  * 
- * @param colora the first color to set
- * @param colorb the second color to set
- * @param width  the width of one color strip
+ * @param colorA first color
+ * @param colorB second color
+ * @param width width of stripes
+ * @param wait wait time to show colorStripe
  */
-void colorAlternate(Adafruit_ColorRGB colora, Adafruit_ColorRGB colorb, uint16_t width, uint16_t wait) {
-  // Swap boolean
-  boolean swap;
+void colorStripe(Adafruit_ColorRGB colorA, Adafruit_ColorRGB colorB, uint16_t width, uint16_t wait) {
+  // Stripe stride and offset
+  uint16_t stride = 2*width;
+  uint16_t offset;
 
-  // Stripe A and B
-  swap = false;
-  for (int i = 0; i < strip.numPixels(); i++) {
-    // Swap colors every width amount of pixels
-    if (i % width == 0) swap = !swap;
-
-    // Set pixel to the given color
-    strip.setPixelColor(i, (swap ? colora : colorb));
+  // Stripe color A
+  offset = 0;
+  for (uint16_t start = offset; start < strip.numPixels(); start += stride) {
+    for (uint16_t i = start; i < start + width; i++) {
+      strip.setPixelColor(i, colorA);
+    }
   }
-  // Update and delay
-  strip.show();
-  delay(wait);
 
-  // Stripe B and A
-  swap = true;
-  for (int i = 0; i < strip.numPixels(); i++) {
-    // Swap colors every width amount of pixels
-    if (i % width == 0) swap = !swap;
-
-    // Set pixel to the given color
-    strip.setPixelColor(i, (swap ? colora : colorb));
+  // Stripe color B
+  offset = width;
+  for (uint16_t start = offset; start < strip.numPixels(); start += stride) {
+    for (uint16_t i = start; i < start + width; i++) {
+      strip.setPixelColor(i, colorB);
+    }
   }
-  // Update and display
+
+  // Show strip
   strip.show();
   delay(wait);
 }
