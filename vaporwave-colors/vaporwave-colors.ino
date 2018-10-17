@@ -1,10 +1,10 @@
 /**
- * Program: Eagles Colors
+ * Program: Drexel Colors
  * 
- * Color displays with Eagles Colors!
+ * Color displays with Drexel Colors!
  * 
  * Author:  Anshul Kharabanda
- * Created: 10 - 15 - 2018
+ * Created: 9 - 10 - 2016
  */
 
 // Neopixel library
@@ -39,9 +39,9 @@ uint8_t brightness = 255 ;
 uint16_t gradient_length = 255;
 
 // Color info
-Adafruit_ColorRGB blue     = Adafruit_ColorRGB(0.0, 0.0, 1.0);
-Adafruit_ColorRGB yellow   = Adafruit_ColorRGB(1.0, 1.0, 0.0);
-Adafruit_ColorRGB gradient = (yellow - blue) / gradient_length;
+Adafruit_ColorRGB violet   = Adafruit_ColorRGB(0.5, 0.0, 1.0);
+Adafruit_ColorRGB red      = Adafruit_ColorRGB(1.0, 0.0, 0.0);
+Adafruit_ColorRGB gradient = (red - violet) / gradient_length;
 
 /**
  * Runs at the beginning of code
@@ -62,23 +62,23 @@ void loop() {
 
   // Wipe each color 3 time
   for (int i = 0; i < 3; i++) {
-    colorWipe(blue, WIPE_TIME);
-    colorWipe(yellow, WIPE_TIME);
+    colorWipe(violet, WIPE_TIME);
+    colorWipe(red, WIPE_TIME);
   }
 
   // Alternate colors 5 times
   for (int i = 0; i < 5; i++) {
-    colorAlternate(blue, yellow, 4, ALT_TIME);
+    colorAlternate(violet, red, 4, ALT_TIME);
   }
   
   // Gradient fade 3 times
   for (int i = 0; i < 3; i++) {
-    gradientFade(blue, gradient, gradient_length, FADE_TIME);
+    gradientFade(violet, gradient, gradient_length, FADE_TIME);
   }
 
   // Cascade fade 5 times
   for (int i = 0; i < 5; i++) {
-    gradientCascadeFade(blue, gradient, gradient_length, CASCADE_FADE_TIME);
+    gradientCascadeFade(violet, gradient, gradient_length, CASCADE_FADE_TIME);
   }
 }
 

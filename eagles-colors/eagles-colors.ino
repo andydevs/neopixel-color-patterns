@@ -39,9 +39,9 @@ uint8_t brightness = 255 ;
 uint16_t gradient_length = 255;
 
 // Color info
-Adafruit_ColorRGB blue     = Adafruit_ColorRGB(0.0, 0.0, 1.0);
-Adafruit_ColorRGB yellow   = Adafruit_ColorRGB(1.0, 1.0, 0.0);
-Adafruit_ColorRGB gradient = (yellow - blue) / gradient_length;
+Adafruit_ColorRGB green    = Adafruit_ColorRGB(0.0,  0.5,  0.05);
+Adafruit_ColorRGB silver   = Adafruit_ColorRGB(0.64, 0.67, 0.68);
+Adafruit_ColorRGB gradient = (silver - green) / gradient_length;
 
 /**
  * Runs at the beginning of code
@@ -62,23 +62,23 @@ void loop() {
 
   // Wipe each color 3 time
   for (int i = 0; i < 3; i++) {
-    colorWipe(blue, WIPE_TIME);
-    colorWipe(yellow, WIPE_TIME);
+    colorWipe(green, WIPE_TIME);
+    colorWipe(silver, WIPE_TIME);
   }
 
   // Alternate colors 5 times
   for (int i = 0; i < 5; i++) {
-    colorAlternate(blue, yellow, 4, ALT_TIME);
+    colorAlternate(green, silver, 4, ALT_TIME);
   }
   
   // Gradient fade 3 times
   for (int i = 0; i < 3; i++) {
-    gradientFade(blue, gradient, gradient_length, FADE_TIME);
+    gradientFade(green, gradient, gradient_length, FADE_TIME);
   }
 
   // Cascade fade 5 times
   for (int i = 0; i < 5; i++) {
-    gradientCascadeFade(blue, gradient, gradient_length, CASCADE_FADE_TIME);
+    gradientCascadeFade(green, gradient, gradient_length, CASCADE_FADE_TIME);
   }
 }
 

@@ -1,10 +1,10 @@
 /**
- * Program: Eagles Colors
+ * Program: Winter Colors
  * 
- * Color displays with Eagles Colors!
+ * Color displays with Blue and White Winter Colors!
  * 
  * Author:  Anshul Kharabanda
- * Created: 10 - 15 - 2018
+ * Created: 9 - 10 - 2016
  */
 
 // Neopixel library
@@ -33,15 +33,15 @@ const int CASCADE_FADE_TIME = 10;
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(150, PIN, NEO_GRB + NEO_KHZ800);
 
 // Brightness
-uint8_t brightness = 255 ;
+uint8_t brightness = 50;
 
 // Gradient length
-uint16_t gradient_length = 255;
+uint16_t gradient_length = 256;
 
 // Color info
-Adafruit_ColorRGB blue     = Adafruit_ColorRGB(0.0, 0.0, 1.0);
-Adafruit_ColorRGB yellow   = Adafruit_ColorRGB(1.0, 1.0, 0.0);
-Adafruit_ColorRGB gradient = (yellow - blue) / gradient_length;
+Adafruit_ColorRGB blue     = Adafruit_ColorRGB(0, 0.30, 1);
+Adafruit_ColorRGB white    = Adafruit_ColorRGB(1, 0.60, 0.20);
+Adafruit_ColorRGB gradient = (white - blue) / gradient_length;
 
 /**
  * Runs at the beginning of code
@@ -50,36 +50,13 @@ void setup() {
   Serial.begin(9600);
   strip.begin();
   strip.setBrightness(brightness);
-  strip.show();
 }
 
 /**
  * Runs repeatedly
  */
 void loop() {
-  // Clear color
-  colorClear();
-
-  // Wipe each color 3 time
-  for (int i = 0; i < 3; i++) {
-    colorWipe(blue, WIPE_TIME);
-    colorWipe(yellow, WIPE_TIME);
-  }
-
-  // Alternate colors 5 times
-  for (int i = 0; i < 5; i++) {
-    colorAlternate(blue, yellow, 4, ALT_TIME);
-  }
-  
-  // Gradient fade 3 times
-  for (int i = 0; i < 3; i++) {
-    gradientFade(blue, gradient, gradient_length, FADE_TIME);
-  }
-
-  // Cascade fade 5 times
-  for (int i = 0; i < 5; i++) {
-    gradientCascadeFade(blue, gradient, gradient_length, CASCADE_FADE_TIME);
-  }
+  gradientCascadeFade(blue, gradient, gradient_length, CASCADE_FADE_TIME);
 }
 
 // ------------------------------------ EFFECTS ------------------------------------
@@ -184,3 +161,4 @@ void gradientCascadeFade(Adafruit_ColorRGB start, Adafruit_ColorRGB gradient, ui
     delay(wait);
   }
 }
+
