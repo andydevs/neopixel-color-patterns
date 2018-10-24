@@ -1,10 +1,10 @@
 /**
- * Program: Eagles Colors
+ * Program: Drexel Colors
  * 
- * Color displays with Eagles Colors!
+ * Color displays with Drexel Colors!
  * 
  * Author:  Anshul Kharabanda
- * Created: 10 - 15 - 2018
+ * Created: 9 - 10 - 2016
  */
 
 // Neopixel library
@@ -33,23 +33,29 @@ const int CASCADE_FADE_TIME = 10;
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(150, PIN, NEO_GRB + NEO_KHZ800);
 
 // Brightness
-uint8_t brightness = 255 ;
+uint8_t brightness = 255;
 
 // Gradient length
 uint16_t gradient_length = 255;
 
 // Color info
-Adafruit_ColorRGB blue     = Adafruit_ColorRGB(0, 0.30, 1);
-Adafruit_ColorRGB white    = Adafruit_ColorRGB(1, 0.60, 0.20);
-
-// Gradient info
-Adafruit_ColorRGB gradient_blue2white = (white - blue) / gradient_length;
-Adafruit_ColorRGB gradient_white2blue = (blue - white) / gradient_length;
+#define NUM_COLORS 2
+Adafruit_ColorRGB COLORS[NUM_COLORS] = {
+    Adafruit_ColorRGB(0.0, 0.3, 1.0),
+    Adafruit_ColorRGB(1.0, 0.6, 0.2),
+};
+Adafruit_ColorRGB GRADIENTS[NUM_COLORS];
 
 /**
  * Runs at the beginning of code
  */
 void setup() {
+  // Generate gradients
+  for (int i = 0; i < NUM_COLORS; i++) {
+    GRADIENTS[i] = ( COLORS[ (i + 1) % NUM_COLORS ] - COLORS[i] ) / gradient_length;
+  }
+
+  // Begin all ports
   Serial.begin(9600);
   strip.begin();
   strip.setBrightness(brightness);
@@ -65,25 +71,28 @@ void loop() {
 
   // Wipe each color 3 time
   for (int i = 0; i < 3; i++) {
-    colorWipe(blue, WIPE_TIME);
-    colorWipe(white, WIPE_TIME);
+    for (int c = 0; c < NUM_COLORS; c++) {
+      wipeColor(c, WIPE_TIME);
+    }
   }
 
   // Alternate colors 5 times
   for (int i = 0; i < 5; i++) {
-    colorStripe(blue, white, 4, STRIPE_TIME);
-    colorStripe(white, blue, 4, STRIPE_TIME);
+    for (int j = 0; j < NUM_COLORS; j++) {
+      stripeAllColors(j, 4, STRIPE_TIME);
+    }
   }
   
   // Gradient fade 3 times
   for (int i = 0; i < 3; i++) {
-    gradientFade(blue, gradient_blue2white, gradient_length, FADE_TIME);
-    gradientFade(white, gradient_white2blue, gradient_length, FADE_TIME);
+    for (int j = 0; j < NUM_COLORS; j++) {
+      fadeGradient(j, FADE_TIME);
+    }
   }
-
+  
   // Cascade fade 5 times
   for (int i = 0; i < 5; i++) {
-    gradientCascadeFade(blue, gradient, gradient_length, CASCADE_FADE_TIME);
+    cascadeFadeGradient(CASCADE_FADE_TIME);
   }
 }
 
@@ -101,47 +110,32 @@ void colorClear() {
 }
 
 /**
- * Wipes the entire strip with the given color
+ * Wipe color at the given index
  * 
- * @param color the color to wipe the strip with
- * @param wait  the wait time between each led lighting
+ * @param index the index of the color in the COLORS array
+ * @param wait delay time between each pixel getting lit up in the wipe
  */
-void colorWipe(Adafruit_ColorRGB color, uint16_t wait) {
-  // Wipe each color
+void wipeColor(uint8_t index, uint16_t wait) {
   for (int i = 0; i < strip.numPixels(); i++) {
-    strip.setPixelColor(i, color);
+    strip.setPixelColor(i, COLORS[index]);
     strip.show();
     delay(wait);
   }
 }
 
 /**
- * Stripe color A and color B in alternating stripes of given width
- * 
- * @param colorA first color
- * @param colorB second color
- * @param width width of stripes
- * @param wait wait time to show colorStripe
+ * Stripes all colors offsetted by the given index offset
  */
-void colorStripe(Adafruit_ColorRGB colorA, Adafruit_ColorRGB colorB, uint16_t width, uint16_t wait) {
-  // Stripe stride and offset
-  uint16_t stride = 2*width;
-  uint16_t offset;
+void stripeAllColors(uint8_t indexOffset, uint16_t width, uint16_t wait) {
+  // Declare variables
+  uint16_t stride = NUM_COLORS*width;
+  uint16_t c, offset;
 
-  // Stripe color A
-  offset = 0;
-  for (uint16_t start = offset; start < strip.numPixels(); start += stride) {
-    for (uint16_t i = start; i < start + width; i++) {
-      strip.setPixelColor(i, colorA);
-    }
-  }
-
-  // Stripe color B
-  offset = width;
-  for (uint16_t start = offset; start < strip.numPixels(); start += stride) {
-    for (uint16_t i = start; i < start + width; i++) {
-      strip.setPixelColor(i, colorB);
-    }
+  // Stripe each color successively
+  for (int k = 0; k < NUM_COLORS; k++) {
+     c = (k + indexOffset) % NUM_COLORS;
+     offset = k*width;
+     stripeColor(c, width, stride, offset);
   }
 
   // Show strip
@@ -150,37 +144,71 @@ void colorStripe(Adafruit_ColorRGB colorA, Adafruit_ColorRGB colorB, uint16_t wi
 }
 
 /**
- * Fades between colors mapped by gradient
- * 
- * @param gradient the gradient map
- * @param wait     the time between iterations
+ * Stripes the color given by the index
  */
-void gradientFade(Adafruit_ColorRGB start, Adafruit_ColorRGB gradient, uint16_t gradient_length, uint16_t wait) {
+void stripeColor(uint8_t index, uint16_t width, uint16_t stride, uint16_t offset) {
+  for (uint16_t start = offset; start < strip.numPixels(); start += stride) {
+    for (uint16_t i = start; i < start + width; i++) {
+      strip.setPixelColor(i, COLORS[index]);
+    }
+  }
+}
+
+/**
+ * Fades color/gradient at given index
+ * 
+ * @param index index of color/gradient combo
+ * @param wait wait time between fade frames
+ */
+void fadeGradient(uint8_t index, uint16_t wait) {
+  // Set up start and gradient
+  Adafruit_ColorRGB start = COLORS[index];
+  Adafruit_ColorRGB gradient = GRADIENTS[index];
+
   // For each time step
   for (uint16_t t = 0; t < gradient_length; t++) {
     for (uint16_t i = 0; i < strip.numPixels(); i++) {
       strip.setPixelColor(i, start + gradient*t);
     }
+
+    // Show strip
     strip.show();
     delay(wait);
   }
 }
 
 /**
- * Fades a cascade on the strip of colors mapped by the given gradient
+ * Displays all gradients in a linear cascade 
  * 
- * @param gradient the gradient map
- * @param wait     the time between iterations
+ * @param wait delay time between frames
  */
-void gradientCascadeFade(Adafruit_ColorRGB start, Adafruit_ColorRGB gradient, uint16_t gradient_length, uint16_t wait) {
-  uint16_t l, x;
-  for (int i = 0; i < 2*gradient_length; i++) {
-    for (int j = 0; j < strip.numPixels(); j++) {
-      l = (i + j*gradient_length/strip.numPixels()) % (2*gradient_length);
-      x = l > gradient_length ? 2*gradient_length - l : l;
-      strip.setPixelColor(j, start + gradient*x);
+void cascadeFadeGradient(uint16_t wait) {
+  // Algorithm variables
+  uint16_t gradient_select, true_position, gradient_position;
+  Adafruit_ColorRGB start, gradient;
+
+  // For each time t
+  for (uint16_t t = 0; t < NUM_COLORS*gradient_length; t++) {
+    
+    // For each pixel in the strip
+    for (uint16_t i = 0; i < strip.numPixels(); i++) {
+      // Set variables
+      true_position = (t + i*gradient_length/strip.numPixels()) % (NUM_COLORS*gradient_length);
+      gradient_select = true_position / gradient_length;
+      gradient_position = true_position % gradient_length;
+
+      // Set gradients
+      start = COLORS[gradient_select];
+      gradient = GRADIENTS[gradient_select];
+
+      // Set pixel to gradient
+      strip.setPixelColor(i, start + gradient*gradient_position);
+    
     }
+
+    // Show strip
     strip.show();
     delay(wait);
+    
   }
 }
