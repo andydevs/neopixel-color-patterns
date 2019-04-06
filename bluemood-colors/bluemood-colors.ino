@@ -39,13 +39,10 @@ uint8_t brightness = 100;
 uint16_t gradient_length = 255;
 
 // Color info
-#define NUM_COLORS 5
+#define NUM_COLORS 2
 Adafruit_ColorRGB COLORS[NUM_COLORS] = {
-  Adafruit_ColorRGB(0.5, 0.0, 1.0),
-  Adafruit_ColorRGB(0.2, 1.0, 1.0),
-  Adafruit_ColorRGB(0.2, 1.0, 0.1),
-  Adafruit_ColorRGB(1.0, 0.0, 0.0),
-  Adafruit_ColorRGB(1.0, 0.2, 0.0)
+  Adafruit_ColorRGB(0.0, 0.0, 1.0),
+  Adafruit_ColorRGB(0.2, 1.0, 1.0)
 };
 Adafruit_ColorRGB GRADIENTS[NUM_COLORS];
 
@@ -69,34 +66,8 @@ void setup() {
  * Runs repeatedly
  */
 void loop() {
-  // Clear color
-  colorClear();
-
-  // Wipe each color 3 time
-  for (int i = 0; i < 3; i++) {
-    for (int c = 0; c < NUM_COLORS; c++) {
-      wipeColor(c, WIPE_TIME);
-    }
-  }
-
-  // Alternate colors 5 times
-  for (int i = 0; i < 5; i++) {
-    for (int j = 0; j < NUM_COLORS; j++) {
-      stripeAllColors(j, 4, STRIPE_TIME);
-    }
-  }
-  
-  // Gradient fade 3 times
-  for (int i = 0; i < 3; i++) {
-    for (int j = 0; j < NUM_COLORS; j++) {
-      fadeGradient(j, FADE_TIME);
-    }
-  }
-  
-  // Cascade fade 5 times
-  for (int i = 0; i < 5; i++) {
-    cascadeFadeGradient(CASCADE_FADE_TIME);
-  }
+  // Cascade Fade
+  cascadeFadeGradient(CASCADE_FADE_TIME);
 }
 
 // ------------------------------------ EFFECTS ------------------------------------
